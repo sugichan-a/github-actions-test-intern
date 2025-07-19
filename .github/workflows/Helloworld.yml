@@ -1,8 +1,25 @@
-name: HelloWorld                 # ワークフローの名前
-on: push                         # ワークフローが動作するトリガー、この記載ではpushしたときに動作する
-jobs:                            # jobの定義
-  hello-world:                   # jobのID
-    runs-on: ubuntu-latest       # ランナー（ジョブが動作するDocker Image）、今回はubuntuの最新のイメージを利用
-    steps:                       # ここからjobの中で実行されるコマンドですよーという意味
-      - name: Hello World        # stepは一つ一つ名前がつけることができます（つけておくとどこで失敗したのかがわかりやすくなります）
-        run: echo "Hello World"  # 実行されるコマンド、echoでHello Worldを表示
+name: PreMerge Build
+
+on:
+  pull_request:
+    branches:
+      - main  # PRのターゲットブランチがmainの場合に動作する
+
+jobs:
+  pre-merge-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '23'
+
+      - name: Install dependencies
+        run: cd frontend && npm install
+
+      - name: Build the project
+        run: cd frontend && npm run build
